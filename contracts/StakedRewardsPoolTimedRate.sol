@@ -11,10 +11,7 @@ import "./StakedRewardsPool.sol";
 // https://consensys.github.io/smart-contract-best-practices/recommendations/#the-15-second-rule
 /* solhint-disable not-rely-on-time */
 
-contract StakedRewardsPoolTimedRate is
-	StakedRewardsPool,
-	IStakedRewardsPoolTimedRate
-{
+contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTimedRate {
 	using SafeMath for uint256;
 
 	/* Mutable Private State */
@@ -29,22 +26,14 @@ contract StakedRewardsPoolTimedRate is
 	/* Modifiers */
 
 	modifier whenStarted {
-		require(
-			hasStarted(),
-			"StakedRewardsPoolTimedRate: current rewards distribution period has not yet begun"
-		);
+		require(hasStarted(), "StakedRewardsPoolTimedRate: current rewards distribution period has not yet begun");
 		_;
 	}
 
 	/* Constructor */
 
-	constructor(
-		IERC20 rewardsToken,
-		IERC20 stakingToken,
-		uint8 stakingTokenDecimals,
-		uint256 periodStartTime,
-		uint256 periodEndTime
-	) StakedRewardsPool(rewardsToken, stakingToken, stakingTokenDecimals) {
+	constructor(IERC20 rewardsToken, IERC20 stakingToken, uint8 stakingTokenDecimals, uint256 periodStartTime, uint256 periodEndTime)
+	StakedRewardsPool(rewardsToken, stakingToken, stakingTokenDecimals) {
 		_periodStartTime = periodStartTime;
 		_periodEndTime = periodEndTime;
 	}
@@ -74,24 +63,16 @@ contract StakedRewardsPoolTimedRate is
 		}
 
 		uint256 dt = lastTimeApplicable.sub(lastUpdateTime);
+		
 		if (dt == 0) {
 			return _accruedRewardPerToken;
 		}
 
 		uint256 accruedReward = _rewardRate.mul(dt);
-
-		return
-			_accruedRewardPerToken.add(
-				accruedReward.mul(_getStakingTokenBase()).div(totalSupply)
-			);
+		return _accruedRewardPerToken.add(accruedReward.mul(_getStakingTokenBase()).div(totalSupply));
 	}
 
-	function earned(address account)
-		public
-		view
-		override(IStakedRewardsPool, StakedRewardsPool)
-		returns (uint256)
-	{
+	function earned(address account) public view override(IStakedRewardsPool, StakedRewardsPool) returns (uint256) {
 		// Divide by stakingTokenBase in accordance with accruedRewardPerToken()
 		return
 			balanceOf(account)
@@ -100,13 +81,9 @@ contract StakedRewardsPoolTimedRate is
 				.add(_rewards[account]);
 	}
 
-	function hasStarted() public view override returns (bool) {
-		return block.timestamp >= _periodStartTime;
-	}
+	function hasStarted() public view override returns (bool) {	return block.timestamp >= _periodStartTime; }
 
-	function hasEnded() public view override returns (bool) {
-		return block.timestamp >= _periodEndTime;
-	}
+	function hasEnded() public view override returns (bool) { return block.timestamp >= _periodEndTime;	}
 
 	function lastTimeRewardApplicable() public view override returns (uint256) {
 		// Returns 0 if we have never run a staking period.
@@ -117,65 +94,34 @@ contract StakedRewardsPoolTimedRate is
 		return Math.min(block.timestamp, _periodEndTime);
 	}
 
-	function periodDuration() public view override returns (uint256) {
-		return _periodEndTime.sub(_periodStartTime);
-	}
+	function periodDuration() public view override returns (uint256) { return _periodEndTime.sub(_periodStartTime);	}
 
-	function periodEndTime() public view override returns (uint256) {
-		return _periodEndTime;
-	}
+	function periodEndTime() public view override returns (uint256) { return _periodEndTime; }
 
-	function periodStartTime() public view override returns (uint256) {
-		return _periodStartTime;
-	}
+	function periodStartTime() public view override returns (uint256) { return _periodStartTime; }
 
-	function rewardRate() public view override returns (uint256) {
-		return _rewardRate;
-	}
+	function rewardRate() public view override returns (uint256) { return _rewardRate; }
 
-	function timeRemainingInPeriod()
-		public
-		view
-		override
-		whenStarted
-		returns (uint256)
-	{
+	function timeRemainingInPeriod() public view override whenStarted returns (uint256)	{
 		if (hasEnded()) {
 			return 0;
 		}
+
 		return _periodEndTime.sub(block.timestamp);
 	}
 
 	/* Public Mutators */
 
-	function addToRewardsAllocation(uint256 amount)
-		public
-		override
-		nonReentrant
-		onlyOwner
-	{
+	function addToRewardsAllocation(uint256 amount)	public override nonReentrant onlyOwner {
 		_addToRewardsAllocation(amount);
 	}
 
-	function setNewPeriod(uint256 startTime, uint256 endTime)
-		public
-		override
-		onlyOwner
-	{
-		require(
-			!hasStarted() || hasEnded(),
-			"StakedRewardsPoolTimedRate: cannot change an ongoing staking period"
-		);
-		require(
-			endTime > startTime,
-			"StakedRewardsPoolTimedRate: endTime must be greater than startTime"
-		);
+	function setNewPeriod(uint256 startTime, uint256 endTime) public override onlyOwner {
+		require(!hasStarted() || hasEnded(), "StakedRewardsPoolTimedRate: cannot change an ongoing staking period");
+		require(endTime > startTime, "StakedRewardsPoolTimedRate: endTime must be greater than startTime");
 		// The lastTimeRewardApplicable() function would not allow rewards for a
 		// past period that was never started.
-		require(
-			startTime > block.timestamp,
-			"StakedRewardsPoolTimedRate: startTime must be greater than the current block time"
-		);
+		require(startTime > block.timestamp, "StakedRewardsPoolTimedRate: startTime must be greater than the current block time");
 		// Ensure that rewards are fully granted before changing the period.
 		_updateAccrual();
 
