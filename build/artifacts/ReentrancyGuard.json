@@ -1,0 +1,14 @@
+{
+  "contractName": "ReentrancyGuard",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b506001600055603f8060226000396000f3fe6080604052600080fdfea264697066735822122056d5aa1199257e31e3d8a0d18213ef5547cbc097b628e1b93361b756c99663a964736f6c63430007030033",
+  "deployedBytecode": "0x6080604052600080fdfea264697066735822122056d5aa1199257e31e3d8a0d18213ef5547cbc097b628e1b93361b756c99663a964736f6c63430007030033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
