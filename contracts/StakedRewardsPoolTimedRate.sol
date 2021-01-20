@@ -22,14 +22,10 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 	uint256 private _periodStartTime;
 	uint256 private _rewardRate;
 
-	/* Modifiers */
-
 	modifier whenStarted {
-		require(hasStarted(), 'StakedRewardsPoolTimedRate: current rewards distribution period has not yet begun');
+		require(hasStarted(), 'SRPTR whenStarted: current rewards distribution period has not yet begun');
 		_;
 	}
-
-	/* Constructor */
 
 	constructor(IERC20 rewardsToken, IERC20 stakingToken, uint8 stakingTokenDecimals, uint256 periodStartTime, uint256 periodEndTime)
 	StakedRewardsPool(rewardsToken, stakingToken, stakingTokenDecimals) {
@@ -37,10 +33,8 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 		_periodEndTime = periodEndTime;
 	}
 
-	/* Public Views */
-
-	// Represents the ratio of reward token to staking token accrued thus far,
-	// multiplied by 10**stakingTokenDecimal in case of a fraction.
+	// Represents the ratio of reward token to staking token accrued thus far
+	// multiplied by 10**stakingTokenDecimal (in event of a fraction).
 	function accruedRewardPerToken() public view override returns (uint256) {
 		uint256 totalSupply = totalSupply();
 		if (totalSupply == 0) {
@@ -50,7 +44,7 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 		uint256 lastUpdateTime = _lastUpdateTime;
 		uint256 lastTimeApplicable = lastTimeRewardApplicable();
 
-		// Allow staking at any time without earning undue rewards
+		// Allow staking at any time without earning undue rewards.
 		// The following is guaranteed if the next `if` is true:
 		// lastUpdateTime == previous _periodEndTime || lastUpdateTime == 0
 		if (_periodStartTime > lastUpdateTime) {
@@ -85,8 +79,7 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 	function hasEnded() public view override returns (bool) { return block.timestamp >= _periodEndTime;	}
 
 	function lastTimeRewardApplicable() public view override returns (uint256) {
-		// Returns 0 if we have never run a staking period.
-		// Returns _periodEndTime if we have but we're not in a staking period.
+		// Returns 0 if we have never run a staking period, else most recent historical endTime.
 		if (!hasStarted()) {
 			return _lastUpdateTime;
 		}
@@ -116,16 +109,16 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 	}
 
 	function setNewPeriod(uint256 startTime, uint256 endTime) public override onlyOwner {
-		require(!hasStarted() || hasEnded(), 'StakedRewardsPoolTimedRate: cannot change an ongoing staking period');
-		require(endTime > startTime, 'StakedRewardsPoolTimedRate: endTime must be greater than startTime');
+		require(!hasStarted() || hasEnded(), 'SRPTR setNewPeriod: cannot change an ongoing staking period');
+		require(endTime > startTime, 'SRPTR setNewPeriod #PartyFoul: ends before the fun begins');
 		// The lastTimeRewardApplicable() function would not allow rewards for a past period that was never started.
-		require(startTime > block.timestamp, 'StakedRewardsPoolTimedRate: startTime must be greater than the current block time');
+		require(startTime > block.timestamp, 'SRPTR setNewPeriod: startTime must be greater than the current block time');
 		// Ensure that rewards are fully granted before changing the period.
 		_updateAccrual();
 
 		if (hasEnded()) {
-			// Reset reward rate if this a brand new period (not changing one)
-			// Note that you MUST addToRewardsAllocation again if you forgot to call
+			// Reset reward rate if this a **new** period (not changing one)
+			// Note: you MUST addToRewardsAllocation again if you forgot to call
 			// this after the previous period ended but before adding rewards.
 			_rewardRate = 0;
 		} else {
