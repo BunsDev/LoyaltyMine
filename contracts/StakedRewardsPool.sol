@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/GSN/Context.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/GSN/Context.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import '@openzeppelin/contracts/utils/Pausable.sol';
+import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
+import '@openzeppelin/contracts/token/ERC20/SafeERC20.sol';
+import '@openzeppelin/contracts/math/SafeMath.sol';
 
-import "./interfaces/IStakedRewardsPool.sol";
+import './interfaces/IStakedRewardsPool.sol';
 
 abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausable, IStakedRewardsPool {
 	using SafeERC20 for IERC20;
@@ -35,7 +35,7 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 
 	constructor(IERC20 rewardsToken, IERC20 stakingToken, uint8 stakingTokenDecimals) Ownable() {
 		// Prevent overflow, though 76 would create a safe but unusable contract
-		require(stakingTokenDecimals < 77, "StakedRewardsPool: staking token has far too many decimals");
+		require(stakingTokenDecimals < 77, 'StakedRewardsPool: staking token has far too many decimals');
 		_rewardsToken = rewardsToken;
 		_stakingToken = stakingToken;
 		_stakingTokenDecimals = stakingTokenDecimals;
@@ -105,7 +105,7 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 	function _getRewardExact(uint256 amount) internal virtual {
 		_updateRewardFor(_msgSender());
 		uint256 reward = _rewards[_msgSender()];
-		require(amount <= reward, "StakedRewardsPool: can not redeem more rewards than you have earned");
+		require(amount <= reward, 'StakedRewardsPool: can not redeem more rewards than you have earned');
 		
 		_rewards[_msgSender()] = reward.sub(amount);
 		_rewardsToken.safeTransfer(_msgSender(), amount);
@@ -114,8 +114,8 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 	}
 
 	function _recoverUnsupportedERC20(IERC20 token, address to,	uint256 amount) internal virtual {
-		require(token != _stakingToken, "StakedRewardsPool: cannot withdraw the staking token");
-		require(token != _rewardsToken, "StakedRewardsPool: cannot withdraw the rewards token");
+		require(token != _stakingToken, 'StakedRewardsPool: cannot withdraw the staking token');
+		require(token != _rewardsToken, 'StakedRewardsPool: cannot withdraw the rewards token');
 		
 		token.safeTransfer(to, amount);
 		
@@ -123,8 +123,8 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 	}
 
 	function _stakeFrom(address account, uint256 amount) internal virtual {
-		require(account != address(0), "StakedRewardsPool: cannot stake from the zero address");
-		require(amount > 0, "StakedRewardsPool: cannot stake zero");
+		require(account != address(0), 'StakedRewardsPool: cannot stake from the zero address');
+		require(amount > 0, 'StakedRewardsPool: cannot stake zero');
 		
 		_updateRewardFor(account);
 		
@@ -138,7 +138,7 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 	function _updateRewardFor(address account) internal virtual;
 
 	function _withdraw(uint256 amount) internal virtual {
-		require(amount > 0, "StakedRewardsPool: cannot withdraw zero");
+		require(amount > 0, 'StakedRewardsPool: cannot withdraw zero');
 		
 		_updateRewardFor(_msgSender());
 		

@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.0;
 
-import "@openzeppelin/contracts/math/Math.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-
-import "./interfaces/IStakedRewardsPoolTimedRate.sol";
-import "./StakedRewardsPool.sol";
+import '@openzeppelin/contracts/math/Math.sol';
+import '@openzeppelin/contracts/math/SafeMath.sol';
+import './interfaces/IStakedRewardsPoolTimedRate.sol';
+import './StakedRewardsPool.sol';
 
 // Accuracy in block.timestamp is not needed.
 // https://consensys.github.io/smart-contract-best-practices/recommendations/#the-15-second-rule
@@ -26,7 +25,7 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 	/* Modifiers */
 
 	modifier whenStarted {
-		require(hasStarted(), "StakedRewardsPoolTimedRate: current rewards distribution period has not yet begun");
+		require(hasStarted(), 'StakedRewardsPoolTimedRate: current rewards distribution period has not yet begun');
 		_;
 	}
 
@@ -117,11 +116,10 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 	}
 
 	function setNewPeriod(uint256 startTime, uint256 endTime) public override onlyOwner {
-		require(!hasStarted() || hasEnded(), "StakedRewardsPoolTimedRate: cannot change an ongoing staking period");
-		require(endTime > startTime, "StakedRewardsPoolTimedRate: endTime must be greater than startTime");
-		// The lastTimeRewardApplicable() function would not allow rewards for a
-		// past period that was never started.
-		require(startTime > block.timestamp, "StakedRewardsPoolTimedRate: startTime must be greater than the current block time");
+		require(!hasStarted() || hasEnded(), 'StakedRewardsPoolTimedRate: cannot change an ongoing staking period');
+		require(endTime > startTime, 'StakedRewardsPoolTimedRate: endTime must be greater than startTime');
+		// The lastTimeRewardApplicable() function would not allow rewards for a past period that was never started.
+		require(startTime > block.timestamp, 'StakedRewardsPoolTimedRate: startTime must be greater than the current block time');
 		// Ensure that rewards are fully granted before changing the period.
 		_updateAccrual();
 
@@ -145,10 +143,8 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 	/* Internal Mutators */
 
 	// Ensure that the amount param is equal to the amount you've added to the contract, otherwise the funds will run out before _periodEndTime.
-	// If called during an ongoing staking period, the amount will be allocated
-	// to the current staking period.
-	// If called before or after a staking period, the amount will only be
-	// applied to the next staking period.
+	// If called during an ongoing staking period, the amount will be allocated to the current staking period.
+	// If called before or after a staking period, the amount will only be applied to the next staking period.
 	function _addToRewardsAllocation(uint256 amount) internal {
 		// TODO Require that amount <= available rewards.
 		_updateAccrual();
