@@ -15,27 +15,19 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 	using SafeERC20 for IERC20;
 	using SafeMath for uint256;
 
-	/* Mutable Internal State */
-
 	mapping(address => uint256) internal _rewards;
-
-	/* Immutable Private State */
 
 	uint8 private _stakingTokenDecimals;
 	IERC20 private _rewardsToken;
 	IERC20 private _stakingToken;
 	uint256 private _stakingTokenBase;
 
-	/* Mutable Private State */
-
 	mapping(address => uint256) private _balances;
 	uint256 private _totalSupply;
 
-	/* Constructor */
-
 	constructor(IERC20 rewardsToken, IERC20 stakingToken, uint8 stakingTokenDecimals) Ownable() {
 		// Prevent overflow, though 76 would create a safe but unusable contract
-		require(stakingTokenDecimals < 77, 'StakedRewardsPool: staking token has far too many decimals');
+		require(stakingTokenDecimals < 77, 'SR Pool: 76 decimals limit');
 		_rewardsToken = rewardsToken;
 		_stakingToken = stakingToken;
 		_stakingTokenDecimals = stakingTokenDecimals;
@@ -66,8 +58,6 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 
 	function pause() public override onlyOwner { _pause(); }
 
-	// In the unlikely event that unsupported tokens are successfully sent to the
-	// contract. This will also allow for removal of airdropped tokens.
 	function recoverUnsupportedERC20(IERC20 token, address to, uint256 amount) public override onlyOwner { _recoverUnsupportedERC20(token, to, amount); }
 
 	function stake(uint256 amount) public override nonReentrant whenNotPaused {	_stakeFrom(_msgSender(), amount); }
@@ -79,8 +69,6 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 	function updateRewardFor(address account) public override nonReentrant { _updateRewardFor(account); }
 
 	function withdraw(uint256 amount) public override nonReentrant { _withdraw(amount); }
-
-	/* Internal Views */
 
 	function _getStakingTokenBase() internal view returns (uint256) { return _stakingTokenBase; }
 
@@ -96,7 +84,7 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 		uint256 reward = _rewards[_msgSender()];
 		if (reward > 0) {
 			_rewards[_msgSender()] = 0;
-			_rewardsToken.safeTransfer(_msgSender(), reward);
+			_rewardsToken.safeTransfer(_msgSender(), reward); // consider transfer
 		
 			emit RewardPaid(_msgSender(), reward);
 		}
@@ -105,10 +93,10 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 	function _getRewardExact(uint256 amount) internal virtual {
 		_updateRewardFor(_msgSender());
 		uint256 reward = _rewards[_msgSender()];
-		require(amount <= reward, 'StakedRewardsPool: can not redeem more rewards than you have earned');
+		require(amount <= reward, 'SR Pool: cannot redeem more rewards than earned');
 		
 		_rewards[_msgSender()] = reward.sub(amount);
-		_rewardsToken.safeTransfer(_msgSender(), amount);
+		_rewardsToken.safeTransfer(_msgSender(), amount); // consider transfer
 		
 		emit RewardPaid(_msgSender(), amount);
 	}
@@ -123,8 +111,8 @@ abstract contract StakedRewardsPool is Context,	ReentrancyGuard, Ownable, Pausab
 	}
 
 	function _stakeFrom(address account, uint256 amount) internal virtual {
-		require(account != address(0), 'StakedRewardsPool: cannot stake from the zero address');
-		require(amount > 0, 'StakedRewardsPool: cannot stake zero');
+		require(account != address(0), 'SR Pool: cannot stake from the zero address');
+		require(amount > 0, 'SR Pool: cannot stake zero');
 		
 		_updateRewardFor(account);
 		
