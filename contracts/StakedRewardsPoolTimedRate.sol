@@ -13,8 +13,6 @@ import './StakedRewardsPool.sol';
 contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTimedRate {
 	using SafeMath for uint256;
 
-	/* Mutable Private State */
-
 	uint256 private _accruedRewardPerToken;
 	mapping(address => uint256) private _accruedRewardPerTokenPaid;
 	uint256 private _lastUpdateTime;
@@ -23,7 +21,7 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 	uint256 private _rewardRate;
 
 	modifier whenStarted {
-		require(hasStarted(), 'SRPTR whenStarted: current rewards distribution period has not yet begun');
+		require(hasStarted(), 'SRPTR: current rewards distribution period has not yet begun');
 		_;
 	}
 
@@ -109,11 +107,11 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 	}
 
 	function setNewPeriod(uint256 startTime, uint256 endTime) public override onlyOwner {
-		require(!hasStarted() || hasEnded(), 'SRPTR setNewPeriod: cannot change an ongoing staking period');
-		require(endTime > startTime, 'SRPTR setNewPeriod #PartyFoul: ends before the fun begins');
-		// The lastTimeRewardApplicable() function would not allow rewards for a past period that was never started.
-		require(startTime > block.timestamp, 'SRPTR setNewPeriod: startTime must be greater than the current block time');
-		// Ensure that rewards are fully granted before changing the period.
+		require(!hasStarted() || hasEnded(), 'SRPTR: cannot change an ongoing staking period');
+		require(endTime > startTime, 'SRPTR setNewPeriod: ends before the fun begins');
+		// The lastTimeRewardApplicable() function would not allow rewards for a past period that was never initiated.
+		require(startTime > block.timestamp, 'SRPTR: startTime must be greater than the current block time');
+		// Ensure rewards are fully granted before changing the period.
 		_updateAccrual();
 
 		if (hasEnded()) {
@@ -122,7 +120,7 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 			// this after the previous period ended but before adding rewards.
 			_rewardRate = 0;
 		} else {
-			// Update reward rate for new duration
+			// Update reward rate for new duration.
 			uint256 totalReward = _rewardRate.mul(periodDuration());
 			_rewardRate = totalReward.div(endTime.sub(startTime));
 		}
@@ -136,13 +134,14 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 	/* Internal Mutators */
 
 	// Ensure that the amount param is equal to the amount you've added to the contract, otherwise the funds will run out before _periodEndTime.
-	// If called during an ongoing staking period, the amount will be allocated to the current staking period.
-	// If called before or after a staking period, the amount will only be applied to the next staking period.
+	// If called during an ongoing staking period, then the amount will be allocated to the current staking period.
+	// If called before or after a staking period, then the amount will only be applied to the next staking period.
 	function _addToRewardsAllocation(uint256 amount) internal {
-		// TODO Require that amount <= available rewards.
+		// TODO Require that amount <= available rewards (see below)
+		// require(amount <= accruedRewardPerToken, 'SRPTR: amount ought not exceed available rewards.')
 		_updateAccrual();
 
-		// Update reward rate based on remaining time
+		// Update reward rate based on remaining time.
 		uint256 remainingTime;
 		if (!hasStarted() || hasEnded()) {
 			remainingTime = periodDuration();
@@ -163,7 +162,7 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 	// This logic is needed for any interaction that may manipulate rewards.
 	function _updateRewardFor(address account) internal override {
 		_updateAccrual();
-		// Allocate due rewards.
+		// Allocate accrued rewards.
 		_rewards[account] = earned(account);
 		// Remove ability to earn rewards on or before the current timestamp.
 		_accruedRewardPerTokenPaid[account] = _accruedRewardPerToken;
