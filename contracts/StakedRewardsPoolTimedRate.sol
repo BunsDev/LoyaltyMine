@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IStakedRewardsPoolTimedRate.sol";
 import "./StakedRewardsPool.sol";
 
-// Accuracy in block.timestamps is not needed.
+// Accuracy in block.timestamp is not needed.
 // https://consensys.github.io/smart-contract-best-practices/recommendations/#the-15-second-rule
 /* solhint-disable not-rely-on-time */
 
@@ -63,7 +63,7 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 		}
 
 		uint256 dt = lastTimeApplicable.sub(lastUpdateTime);
-		
+
 		if (dt == 0) {
 			return _accruedRewardPerToken;
 		}
