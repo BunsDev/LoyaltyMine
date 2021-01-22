@@ -19,6 +19,7 @@ interface IStakedRewardsPool {
 	function totalSupply() external view returns (uint256);
 
 	/* Mutators */
+	function updateRewardToken(IERC20 token) external;
 
 	function exit() external;
 
