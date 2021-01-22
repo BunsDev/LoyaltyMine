@@ -53,7 +53,9 @@ This repository requires some knowledge of:
 
 ```bash
 # Lint
-npm run lint # or npx eslint --init
+npx eslint --init
+npx solhint --init
+npm run lint
 # Compile contracts
 npm run compile # or pnpm compile
 # Generate TypeScript contract interfaces from ABI's (required for tests)
@@ -153,3 +155,7 @@ As of October 16th, 2020, Yearn Land is using `StakingRewardsPoolTimedRate` (the
 `LoyaltyMine` is licensed under the terms of the
 [MIT License](https://opensource.org/licenses/MIT). See
 [LICENSE](LICENSE) for more information.
+
+## Contracts
+* GDAO [Rinkeby](https://rinkeby.etherscan.io/address/0xf35da56343622244f9e1fb0b87950fbfd7fa991b#code): 0xf35Da56343622244f9e1FB0B87950FBFD7FA991B
+* LOYAL [Rikeby](https://rinkeby.etherscan.io/address/0xae1d209c3042e1af58004dacd272a20f87141fcc#code): 0xAe1D209C3042E1aF58004dacd272a20F87141Fcc
