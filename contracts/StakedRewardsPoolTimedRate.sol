@@ -108,7 +108,7 @@ contract StakedRewardsPoolTimedRate is StakedRewardsPool, IStakedRewardsPoolTime
 
 	function setNewPeriod(uint256 startTime, uint256 endTime) public override onlyOwner {
 		require(!hasStarted() || hasEnded(), 'SRPTR: cannot change an ongoing staking period');
-		require(endTime > startTime, 'SRPTR setNewPeriod: ends before the fun begins');
+		require(endTime > startTime, 'SRPTR: ends before the fun begins');
 		// The lastTimeRewardApplicable() function would not allow rewards for a past period that was never initiated.
 		require(startTime > block.timestamp, 'SRPTR: startTime must be greater than the current block time');
 		// Ensure rewards are fully granted before changing the period.
