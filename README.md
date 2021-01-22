@@ -157,5 +157,6 @@ As of October 16th, 2020, Yearn Land is using `StakingRewardsPoolTimedRate` (the
 [LICENSE](LICENSE) for more information.
 
 ## Contracts
+* StakedRewardsPoolTimedRate [Rinkeby](https://rinkeby.etherscan.io/address/0x3da614fa2bf9761f75d5ae7fd7ff1733103f2af7#code): 0x3da614fa2Bf9761f75d5ae7fD7ff1733103F2aF7
 * GDAO [Rinkeby](https://rinkeby.etherscan.io/address/0xf35da56343622244f9e1fb0b87950fbfd7fa991b#code): 0xf35Da56343622244f9e1FB0B87950FBFD7FA991B
 * LOYAL [Rikeby](https://rinkeby.etherscan.io/address/0xae1d209c3042e1af58004dacd272a20f87141fcc#code): 0xAe1D209C3042E1aF58004dacd272a20F87141Fcc
